@@ -2,61 +2,9 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-make-image-uploads-reliable-across-all-post-creation-uis-by-standardizing-validation-preprocessing-and-error-handling-for-uploaded-images-before-sending-them-to-the-canister",
-      "featureTitle": "Make image uploads reliable across all post-creation UIs by standardizing validation, preprocessing, and error handling for uploaded images before sending them to the canister.",
+      "featureId": "feature-fix-user-profile-lookup-so-the-app-can-reliably-resolve-a-principal-to-a-userprofile-username-instead-of-falling-back-to-showing-a-principal-like-identifier-e-g-67jkd-p6hqj-when-rendering-authors",
+      "featureTitle": "Fix user profile lookup so the app can reliably resolve a Principal to a UserProfile username, instead of falling back to showing a principal-like identifier (e.g., \"67jkd-p6hqj-...\") when rendering authors.",
       "files": [
-        "frontend/src/components/CreatePostCard.tsx",
-        "frontend/src/pages/CollectionsPage.tsx",
-        "frontend/src/pages/DiscussionsPage.tsx",
-        "frontend/src/pages/GroupDetailPage.tsx",
-        "frontend/src/utils/backendErrors.ts",
-        "frontend/src/utils/imageUpload.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-optimize-image-uploads-on-the-client-by-automatically-resizing-and-compressing-images-before-converting-them-to-externalblob-to-reduce-upload-time-and-avoid-failures-from-large-image-payloads",
-      "featureTitle": "Optimize image uploads on the client by automatically resizing and compressing images before converting them to ExternalBlob, to reduce upload time and avoid failures from large image payloads.",
-      "files": [
-        "frontend/src/components/CreatePostCard.tsx",
-        "frontend/src/pages/CollectionsPage.tsx",
-        "frontend/src/pages/DiscussionsPage.tsx",
-        "frontend/src/pages/GroupDetailPage.tsx",
-        "frontend/src/utils/imagePreprocess.ts",
-        "frontend/src/utils/imageUpload.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-new-quick-reactions-feature-emoji-reactions-for-plushie-feed-posts-allowing-authenticated-users-to-react-with-one-of-several-predefined-emojis-and-see-reaction-counts-per-post",
-      "featureTitle": "Add a new “quick reactions” feature (emoji reactions) for plushie feed posts, allowing authenticated users to react with one of several predefined emojis and see reaction counts per post.",
-      "files": [
-        "frontend/src/components/PostCard.tsx",
-        "frontend/src/constants/emojiReactions.ts",
         "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
@@ -69,7 +17,49 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-4"
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-main-plushie-feed-post-ui-to-display-the-author-s-saved-username-from-the-user-profile-instead-of-a-truncated-principal-string",
+      "featureTitle": "Update the main plushie feed post UI to display the author’s saved username (from the user profile) instead of a truncated principal string.",
+      "files": [
+        "frontend/src/components/PostCard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-comment-and-group-post-comment-uis-to-display-the-commenter-author-s-saved-username-from-the-user-profile-instead-of-truncated-principal-strings-matching-the-behavior-already-used-in-collection-discussion-post-cards",
+      "featureTitle": "Update comment and group post/comment UIs to display the commenter/author’s saved username (from the user profile) instead of truncated principal strings, matching the behavior already used in Collection/Discussion post cards.",
+      "files": [
+        "frontend/src/components/CommentsSection.tsx",
+        "frontend/src/components/GroupCommentsSection.tsx",
+        "frontend/src/components/GroupPostCard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
       ],
       "confidence": "high"
     }

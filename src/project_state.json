@@ -1,12 +1,14 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 5,
   "summary": "New project",
   "architectural_notes": [
-    "Add image upload optimization pipeline (e.g., client/server-side compression/resizing) to improve reliability and performance."
+    "Add image upload optimization pipeline (e.g., client/server-side compression/resizing) to improve reliability and performance.",
+    "Ensure a consistent user identity mapping layer: always resolve/display human-readable username (handle) rather than principal/ID; define fallback behavior when username is missing."
   ],
   "known_issues": [
-    "Image upload feature does not work properly (user-reported)."
+    "Image upload feature does not work properly (user-reported).",
+    "Username displays as a principal-like identifier (e.g., \"67jkd-p6hqj-...\") instead of the user’s chosen username."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -33,6 +35,30 @@
         "REQ-4"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-user-profile-lookup-so-the-app-can-reliably-resolve-a-principal-to-a-userprofile-username-instead-of-falling-back-to-showing-a-principal-like-identifier-e-g-67jkd-p6hqj-when-rendering-authors",
+      "title": "Fix user profile lookup so the app can reliably resolve a Principal to a UserProfile username, instead of falling back to showing a principal-like identifier (e.g., \"67jkd-p6hqj-...\") when rendering authors.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-main-plushie-feed-post-ui-to-display-the-author-s-saved-username-from-the-user-profile-instead-of-a-truncated-principal-string",
+      "title": "Update the main plushie feed post UI to display the author’s saved username (from the user profile) instead of a truncated principal string.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-comment-and-group-post-comment-uis-to-display-the-commenter-author-s-saved-username-from-the-user-profile-instead-of-truncated-principal-strings-matching-the-behavior-already-used-in-collection-discussion-post-cards",
+      "title": "Update comment and group post/comment UIs to display the commenter/author’s saved username (from the user profile) instead of truncated principal strings, matching the behavior already used in Collection/Discussion post cards.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -48,6 +74,12 @@
       "reqIds": [
         "REQ-3"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Fix username display: app shows principal/canister-style identifier (e.g., \"67jkd-p6hqj-...\") instead of the user’s actual username",
+      "reqIds": [],
       "status": "pending"
     }
   ],

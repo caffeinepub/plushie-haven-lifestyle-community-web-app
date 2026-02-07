@@ -70,10 +70,16 @@ export function useGetUserProfile(user: string) {
     queryKey: ['userProfile', user],
     queryFn: async () => {
       if (!actor) return null;
-      const principal = { toString: () => user } as any;
-      return actor.getUserProfile(principal);
+      try {
+        const principal = Principal.fromText(user);
+        return actor.getUserProfile(principal);
+      } catch (error) {
+        console.error('Failed to parse principal or fetch profile:', error);
+        return null;
+      }
     },
     enabled: !!actor && !isFetching && !!user,
+    retry: false,
   });
 }
 

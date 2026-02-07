@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PlushiePost } from '../backend';
-import { useGetLikeCount, useHasUserLiked, useToggleLike, useGetCommentsForPost, useGetReactions, useToggleEmojiReaction } from '../hooks/useQueries';
+import { useGetLikeCount, useHasUserLiked, useToggleLike, useGetCommentsForPost, useGetReactions, useToggleEmojiReaction, useGetUserProfile } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ export default function PostCard({ post }: PostCardProps) {
   const { data: hasLiked = false } = useHasUserLiked(post.id);
   const { data: comments = [] } = useGetCommentsForPost(post.id);
   const { data: reactions = [] } = useGetReactions(post.id);
+  const { data: authorProfile } = useGetUserProfile(post.author.toString());
   const toggleLike = useToggleLike();
   const toggleEmojiReaction = useToggleEmojiReaction();
 
@@ -66,9 +67,14 @@ export default function PostCard({ post }: PostCardProps) {
     }
   };
 
-  const getInitials = (principal: string) => {
-    return principal.slice(0, 2).toUpperCase();
+  const getInitials = (text: string) => {
+    return text.slice(0, 2).toUpperCase();
   };
+
+  const displayName = authorProfile?.username || `${post.author.toString().slice(0, 12)}...`;
+  const avatarInitials = authorProfile?.username 
+    ? getInitials(authorProfile.username) 
+    : getInitials(post.author.toString());
 
   // Get reaction count for a specific emoji
   const getReactionCount = (emojiId: string): number => {
@@ -82,11 +88,11 @@ export default function PostCard({ post }: PostCardProps) {
       <div className="mb-4 flex items-center gap-3">
         <Avatar className="h-10 w-10 border-2 border-pink-300">
           <AvatarFallback className="bg-gradient-to-br from-pink-400 to-purple-400 text-white text-sm">
-            {getInitials(post.author.toString())}
+            {avatarInitials}
           </AvatarFallback>
         </Avatar>
         <div>
-          <p className="font-medium text-sm">{post.author.toString().slice(0, 12)}...</p>
+          <p className="font-medium text-sm">{displayName}</p>
           <p className="text-xs text-muted-foreground">{formatTimestamp(post.timestamp)}</p>
         </div>
       </div>

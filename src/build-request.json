@@ -1,94 +1,72 @@
 {
   "kind": "build_request",
-  "title": "Optimize image uploads (reliability + compression) and add emoji reactions",
-  "priority": "normal",
+  "title": "Fix username display to show profile username instead of principal-like identifier",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Make image uploads reliable across all post-creation UIs by standardizing validation, preprocessing, and error handling for uploaded images before sending them to the canister.",
+      "id": "REQ-5",
+      "text": "Fix user profile lookup so the app can reliably resolve a Principal to a UserProfile username, instead of falling back to showing a principal-like identifier (e.g., \"67jkd-p6hqj-...\") when rendering authors.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "make sure image uploads are optimized and add new features"
+          "67jkd-p6hqj-... this what username shows"
         ]
       },
       "acceptanceCriteria": [
-        "Image upload input validation is consistent across CreatePostCard, CollectionsPage, DiscussionsPage, GroupDetailPage, and MarketplacePage (at minimum: file type must be image/*, empty selection handled, max size enforced, and clear user-facing error messages).",
-        "If a user selects a non-image file or an oversized image, the UI prevents submission and shows a specific toast error instead of a generic failure.",
-        "When a backend error occurs during upload/create, the UI surfaces a more informative error message when available (e.g., unauthorized, payload too large) and always resets upload progress state to a sane value (0)."
+        "`useGetUserProfile(user: string)` constructs a real Principal value from the provided text (e.g., via the Principal utility) before calling `actor.getUserProfile(...)`, rather than using an ad-hoc `{ toString: () => user } as any` object.",
+        "When a valid profile exists for an author, `useGetUserProfile` returns it (not `null`) and UI components can display `profile.username`.",
+        "If the input `user` string is invalid/unparseable, the query does not crash the app and returns `null` (so UI can use a fallback)."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Optimize image uploads on the client by automatically resizing and compressing images before converting them to ExternalBlob, to reduce upload time and avoid failures from large image payloads.",
+      "id": "REQ-6",
+      "text": "Update the main plushie feed post UI to display the author’s saved username (from the user profile) instead of a truncated principal string.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "make sure image uploads are optimized and add new features"
+          "67jkd-p6hqj-... this what username shows"
         ]
       },
       "acceptanceCriteria": [
-        "Before calling ExternalBlob.fromBytes(...), the app preprocesses the selected image and produces a smaller payload (resize to a reasonable max dimension and compress to a web-friendly format).",
-        "The preview shown to the user still reflects the chosen image (and does not appear rotated incorrectly).",
-        "After preprocessing, the app enforces a final-byte-size limit and blocks submission with a clear toast message if the optimized image is still too large.",
-        "Upload progress UI continues to work as it does now (percentage updates while uploading) using the existing ExternalBlob.withUploadProgress callback."
+        "In `frontend/src/components/PostCard.tsx`, the author display name uses `useGetUserProfile(post.author.toString())` and shows `authorProfile.username` when available.",
+        "In `frontend/src/components/PostCard.tsx`, the avatar fallback initials are derived from `authorProfile.username` when available, otherwise fall back to principal-derived initials.",
+        "When no user profile exists for the author, the UI continues to show a safe fallback (e.g., truncated principal) without layout breakage."
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Add backend-side validation for image-based post creation to prevent traps with unclear causes and to reduce \"Failed to create post\" occurrences by returning consistent, user-friendly error messages for invalid inputs.",
-      "target": "backend",
+      "id": "REQ-7",
+      "text": "Update comment and group post/comment UIs to display the commenter/author’s saved username (from the user profile) instead of truncated principal strings, matching the behavior already used in Collection/Discussion post cards.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "make sure image uploads are optimized and add new features"
+          "67jkd-p6hqj-... this what username shows"
         ]
       },
       "acceptanceCriteria": [
-        "Backend post creation methods that accept Storage.ExternalBlob (at minimum: createPost and createCollectionPost; plus any other existing create* methods that accept image blobs) validate basic constraints (e.g., non-empty required text fields and reasonable maximum text lengths) and fail with clear trap messages when invalid.",
-        "Trap/error messages are specific enough for the frontend to map them to user-facing toast messages (e.g., \"Image too large\", \"Caption is required\", \"Unauthorized\").",
-        "Valid requests continue to succeed without changing existing data already stored."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Add a new “quick reactions” feature (emoji reactions) for plushie feed posts, allowing authenticated users to react with one of several predefined emojis and see reaction counts per post.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "add new features"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend exposes methods to: (1) get reaction counts for a post, (2) get the caller’s current reaction (if any) for that post, and (3) set/clear a reaction for that post.",
-        "Reaction types are limited to a small predefined set of emojis (defined once and reused by frontend and backend).",
-        "Frontend PostCard displays a compact reaction bar (the predefined emojis + counts).",
-        "Tapping an emoji toggles that reaction for the authenticated user; tapping the same emoji again removes it.",
-        "Unauthenticated users can view reaction counts but cannot react (UI clearly indicates reactions require login and does not attempt the mutation).",
-        "Reaction counts update after reacting (via React Query invalidation/refetch) without requiring a full page refresh."
+        "In `frontend/src/components/CommentsSection.tsx`, each comment row resolves `comment.author` to a profile and displays `profile.username` when available (with a fallback if not).",
+        "In `frontend/src/components/GroupPostCard.tsx`, the group post author name resolves to `profile.username` when available (with a fallback if not).",
+        "In `frontend/src/components/GroupCommentsSection.tsx`, each group comment author name resolves to `profile.username` when available (with a fallback if not).",
+        "All user-facing strings introduced/modified for this change are in English."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not edit files in frontend immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui). Compose existing components instead.",
-    "Use English for all user-facing text (toasts, labels, button text, empty states)."
+    "Do not edit any files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything under `frontend/src/components/ui` (compose existing components instead).",
+    "Backend must remain single-actor; only create `backend/migration.mo` if a state upgrade is strictly required (it should not be required for this change)."
   ],
   "nonGoals": [
-    "Implementing third-party storage/CDN for images (all storage remains on the Internet Computer using existing blob-storage mixin).",
-    "Adding real-time updates via WebSockets or push notifications.",
-    "Implementing marketplace backend integration (MarketplacePage can reuse optimized image upload UI, but listings persistence is out of scope unless already implemented)."
+    "Adding a new username system or changing username validation rules.",
+    "Introducing third-party auth providers or any non-Internet-Identity authentication.",
+    "Backend schema changes for user profiles (username/bio) unless proven necessary to fix the display issue."
   ],
   "imageRequirements": {
     "required": [],

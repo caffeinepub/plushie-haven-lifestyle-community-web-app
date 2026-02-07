@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Improve reliability and performance of image uploads across all post-creation flows, and add quick emoji reactions on plushie feed posts.
+**Goal:** Ensure the app consistently displays authors/commenters by their saved profile username instead of a principal-like identifier.
 
 **Planned changes:**
-- Standardize frontend image upload validation, preprocessing, and error handling across CreatePostCard, CollectionsPage, DiscussionsPage, GroupDetailPage, and MarketplacePage (consistent checks, clear toast errors, sane progress reset).
-- Add client-side image resizing/compression before converting to `ExternalBlob`, preserve correct preview orientation, and enforce a final optimized byte-size limit with a clear blocking error.
-- Add backend validation for image-based post creation methods (including `createPost`, `createCollectionPost`, and any other existing `create*` methods that accept image blobs) to return consistent, user-friendly error/trap messages for invalid inputs.
-- Implement “quick reactions” (predefined emoji set) end-to-end: backend APIs to get counts, get caller reaction, and set/clear reaction; frontend reaction bar on PostCard with toggle behavior, login gating, and React Query refresh of counts.
+- Fix `useGetUserProfile(user: string)` to parse/construct a real `Principal` from the provided string before calling `actor.getUserProfile(...)`, and safely return `null` for invalid/unparseable input.
+- Update `PostCard` to resolve `post.author` to a user profile and display `profile.username` when available, including deriving avatar fallback initials from the username when present.
+- Update `CommentsSection`, `GroupPostCard`, and `GroupCommentsSection` to resolve author principals to profiles and display `profile.username` when available, with safe fallbacks when no profile exists.
 
-**User-visible outcome:** Users can upload images more reliably (with faster uploads and clearer error messages) across all relevant creation UIs, and logged-in users can react to plushie feed posts with predefined emojis while everyone can see reaction counts.
+**User-visible outcome:** Across the main feed, comments, and group posts/comments, authors are shown by their saved username when available; otherwise the UI falls back to a safe truncated principal without breaking layout.

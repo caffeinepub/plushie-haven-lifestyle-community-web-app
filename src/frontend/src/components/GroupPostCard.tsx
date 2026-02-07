@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { GroupPost } from '../backend';
-import { useGetGroupComments } from '../hooks/useQueries';
+import { useGetGroupComments, useGetUserProfile } from '../hooks/useQueries';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { MessageCircle } from 'lucide-react';
@@ -14,6 +14,7 @@ interface GroupPostCardProps {
 export default function GroupPostCard({ post, groupId }: GroupPostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const { data: comments = [] } = useGetGroupComments(post.id);
+  const { data: authorProfile } = useGetUserProfile(post.author.toString());
 
   const imageUrl = post.image?.getDirectURL();
 
@@ -32,9 +33,14 @@ export default function GroupPostCard({ post, groupId }: GroupPostCardProps) {
     return date.toLocaleDateString();
   };
 
-  const getInitials = (principal: string) => {
-    return principal.slice(0, 2).toUpperCase();
+  const getInitials = (text: string) => {
+    return text.slice(0, 2).toUpperCase();
   };
+
+  const displayName = authorProfile?.username || `${post.author.toString().slice(0, 12)}...`;
+  const avatarInitials = authorProfile?.username 
+    ? getInitials(authorProfile.username) 
+    : getInitials(post.author.toString());
 
   return (
     <article className="rounded-3xl bg-white dark:bg-gray-800 p-6 shadow-lg transition-shadow hover:shadow-xl">
@@ -42,11 +48,11 @@ export default function GroupPostCard({ post, groupId }: GroupPostCardProps) {
       <div className="mb-4 flex items-center gap-3">
         <Avatar className="h-10 w-10 border-2 border-pink-300">
           <AvatarFallback className="bg-gradient-to-br from-pink-400 to-purple-400 text-white text-sm">
-            {getInitials(post.author.toString())}
+            {avatarInitials}
           </AvatarFallback>
         </Avatar>
         <div>
-          <p className="font-medium text-sm">{post.author.toString().slice(0, 12)}...</p>
+          <p className="font-medium text-sm">{displayName}</p>
           <p className="text-xs text-muted-foreground">{formatTimestamp(post.timestamp)}</p>
         </div>
       </div>

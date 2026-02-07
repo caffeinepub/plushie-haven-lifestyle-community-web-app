@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useGetCommentsForPost, useCreateComment } from '../hooks/useQueries';
+import { Comment } from '../backend';
+import { useGetCommentsForPost, useCreateComment, useGetUserProfile } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,51 @@ import { toast } from 'sonner';
 
 interface CommentsSectionProps {
   postId: string;
+}
+
+function CommentItem({ comment }: { comment: Comment }) {
+  const { data: authorProfile } = useGetUserProfile(comment.author.toString());
+
+  const formatTimestamp = (timestamp: bigint) => {
+    const date = new Date(Number(timestamp) / 1_000_000);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return date.toLocaleDateString();
+  };
+
+  const getInitials = (text: string) => {
+    return text.slice(0, 2).toUpperCase();
+  };
+
+  const displayName = authorProfile?.username || `${comment.author.toString().slice(0, 12)}...`;
+  const avatarInitials = authorProfile?.username 
+    ? getInitials(authorProfile.username) 
+    : getInitials(comment.author.toString());
+
+  return (
+    <div className="flex gap-3 rounded-2xl bg-pink-50/50 dark:bg-gray-700/50 p-3">
+      <Avatar className="h-8 w-8 border-2 border-pink-200">
+        <AvatarFallback className="bg-gradient-to-br from-pink-300 to-purple-300 text-white text-xs">
+          {avatarInitials}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-xs font-medium truncate">
+            {displayName}
+          </p>
+          <p className="text-xs text-muted-foreground">{formatTimestamp(comment.timestamp)}</p>
+        </div>
+        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{comment.content}</p>
+      </div>
+    </div>
+  );
 }
 
 export default function CommentsSection({ postId }: CommentsSectionProps) {
@@ -35,23 +81,6 @@ export default function CommentsSection({ postId }: CommentsSectionProps) {
     } catch (error) {
       toast.error('Failed to post comment');
     }
-  };
-
-  const formatTimestamp = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) / 1_000_000);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return date.toLocaleDateString();
-  };
-
-  const getInitials = (principal: string) => {
-    return principal.slice(0, 2).toUpperCase();
   };
 
   return (
@@ -84,22 +113,7 @@ export default function CommentsSection({ postId }: CommentsSectionProps) {
           <p className="text-sm text-muted-foreground text-center py-4">Loading comments...</p>
         ) : comments.length > 0 ? (
           comments.map((comment) => (
-            <div key={comment.id} className="flex gap-3 rounded-2xl bg-pink-50/50 dark:bg-gray-700/50 p-3">
-              <Avatar className="h-8 w-8 border-2 border-pink-200">
-                <AvatarFallback className="bg-gradient-to-br from-pink-300 to-purple-300 text-white text-xs">
-                  {getInitials(comment.author.toString())}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-xs font-medium truncate">
-                    {comment.author.toString().slice(0, 12)}...
-                  </p>
-                  <p className="text-xs text-muted-foreground">{formatTimestamp(comment.timestamp)}</p>
-                </div>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{comment.content}</p>
-              </div>
-            </div>
+            <CommentItem key={comment.id} comment={comment} />
           ))
         ) : (
           <p className="text-sm text-muted-foreground text-center py-4">

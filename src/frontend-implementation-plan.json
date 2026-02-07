@@ -1,122 +1,64 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Reliable, optimized image uploads + emoji quick reactions for feed posts",
+  "title": "Fix author username resolution and display across feed, comments, and group posts",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Standardize image upload validation, preprocessing flow entry points, and user-facing error handling across all post-creation UIs.",
+      "id": "REQ-5",
+      "summary": "Parse author principal text into a real Principal for profile lookups and gracefully handle invalid principal strings.",
       "acceptanceCriteria": [
-        "Image upload input validation is consistent across CreatePostCard, CollectionsPage, DiscussionsPage, GroupDetailPage, and MarketplacePage (at minimum: file type must be image/*, empty selection handled, max size enforced, and clear user-facing error messages).",
-        "If a user selects a non-image file or an oversized image, the UI prevents submission and shows a specific toast error instead of a generic failure.",
-        "When a backend error occurs during upload/create, the UI surfaces a more informative error message when available (e.g., unauthorized, payload too large) and always resets upload progress state to a sane value (0)."
+        "`useGetUserProfile(user: string)` constructs a real Principal value from the provided text (e.g., via the Principal utility) before calling `actor.getUserProfile(...)`, rather than using an ad-hoc `{ toString: () => user } as any` object.",
+        "When a valid profile exists for an author, `useGetUserProfile` returns it (not `null`) and UI components can display `profile.username`.",
+        "If the input `user` string is invalid/unparseable, the query does not crash the app and returns `null` (so UI can use a fallback)."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/utils/imageUpload.ts",
-          "operation": "create",
-          "description": "Create shared helpers for image upload selection handling: consistent validation (empty selection, image/* MIME, max original size), preview creation, and producing standardized error messages for toasts. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/backendErrors.ts",
-          "operation": "create",
-          "description": "Add a small utility to normalize backend/canister errors into user-friendly messages (e.g., Unauthorized, payload too large, validation failures) for consistent toast handling across upload/create flows. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/CreatePostCard.tsx",
-          "operation": "modify",
-          "description": "Refactor image selection + submit flow to use the shared imageUpload utilities and backend error normalization; ensure empty selection is handled, non-image/oversize blocks submission with specific toast, and uploadProgress always resets to 0 on failure. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/CollectionsPage.tsx",
-          "operation": "modify",
-          "description": "Refactor image selection + submit flow to use the shared imageUpload utilities and backend error normalization; add missing file type validation, consistent oversize handling, and ensure uploadProgress resets to 0 on failures. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/DiscussionsPage.tsx",
-          "operation": "modify",
-          "description": "Refactor optional image upload handling to use shared validation utilities (including empty selection handling and max size enforcement when an image is chosen) and standardized backend error toasts; ensure uploadProgress resets to 0 on failure. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/GroupDetailPage.tsx",
-          "operation": "modify",
-          "description": "Refactor optional image upload handling to use shared validation utilities and standardized backend error toasts; keep current Unauthorized messaging but route through shared error normalization; ensure uploadProgress resets to 0 on failure. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/MarketplacePage.tsx",
-          "operation": "modify",
-          "description": "Update the mock listing image chooser to use the same shared validation and preview behavior (image/* only, empty selection handled, max size enforced, clear toast errors) even though backend persistence is out of scope. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Resize/compress images on the client before converting to ExternalBlob while preserving preview correctness and upload progress behavior.",
-      "acceptanceCriteria": [
-        "Before calling ExternalBlob.fromBytes(...), the app preprocesses the selected image and produces a smaller payload (resize to a reasonable max dimension and compress to a web-friendly format).",
-        "The preview shown to the user still reflects the chosen image (and does not appear rotated incorrectly).",
-        "After preprocessing, the app enforces a final-byte-size limit and blocks submission with a clear toast message if the optimized image is still too large.",
-        "Upload progress UI continues to work as it does now (percentage updates while uploading) using the existing ExternalBlob.withUploadProgress callback."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/imagePreprocess.ts",
-          "operation": "create",
-          "description": "Implement client-side image preprocessing: decode image with correct orientation handling where supported, resize to a reasonable max dimension, compress to a web-friendly format, and return optimized bytes plus metadata for final size enforcement. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/imageUpload.ts",
-          "operation": "modify",
-          "description": "Integrate preprocessing into the shared image upload pipeline (validate -> preprocess -> enforce final optimized byte-size limit) and expose a single helper used by all creation UIs before calling ExternalBlob.fromBytes(...). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/CreatePostCard.tsx",
-          "operation": "modify",
-          "description": "Update submission to preprocess selected image before ExternalBlob.fromBytes(...), enforce final optimized size limit with a clear toast, keep existing ExternalBlob.withUploadProgress behavior, and keep preview consistent with the chosen image. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/CollectionsPage.tsx",
-          "operation": "modify",
-          "description": "Update submission to preprocess selected image before ExternalBlob.fromBytes(...), enforce final optimized size limit with a clear toast, and keep existing ExternalBlob.withUploadProgress progress UI intact. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/DiscussionsPage.tsx",
-          "operation": "modify",
-          "description": "Update optional image path to preprocess before ExternalBlob.fromBytes(...), enforce final optimized size limit, preserve preview correctness, and keep upload progress behavior unchanged. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/GroupDetailPage.tsx",
-          "operation": "modify",
-          "description": "Update optional image path to preprocess before ExternalBlob.fromBytes(...), enforce final optimized size limit, preserve preview correctness, and keep upload progress behavior unchanged. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Add quick emoji reactions UI to plushie feed posts with predefined emoji set, auth-aware toggling, and React Query refresh.",
-      "acceptanceCriteria": [
-        "Backend exposes methods to: (1) get reaction counts for a post, (2) get the caller’s current reaction (if any) for that post, and (3) set/clear a reaction for that post.",
-        "Reaction types are limited to a small predefined set of emojis (defined once and reused by frontend and backend).",
-        "Frontend PostCard displays a compact reaction bar (the predefined emojis + counts).",
-        "Tapping an emoji toggles that reaction for the authenticated user; tapping the same emoji again removes it.",
-        "Unauthenticated users can view reaction counts but cannot react (UI clearly indicates reactions require login and does not attempt the mutation).",
-        "Reaction counts update after reacting (via React Query invalidation/refetch) without requiring a full page refresh."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/constants/emojiReactions.ts",
-          "operation": "create",
-          "description": "Define the small predefined emoji reaction set in one place for reuse across PostCard and reaction hooks (must match the backend-accepted emoji IDs). Verify the component's usage instructions before implementing."
-        },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add React Query hooks for reactions using existing backend capabilities: fetch reactions per post, and toggle/set/clear via the existing reaction mutation; ensure successful mutations invalidate/refetch the relevant reaction query keys. Verify the component's usage instructions before implementing."
-        },
+          "description": "Update `useGetUserProfile(user: string)` to construct a real `Principal` from `user` (e.g., `Principal.fromText(user)`), call `actor.getUserProfile(principal)`, and wrap parsing/calls in try/catch so invalid/unparseable input returns `null` without crashing; keep query gated by actor availability and disable retries for parse/authorization failures."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Show author username (from user profile) in the main plushie feed PostCard, with username-derived avatar initials and safe fallback.",
+      "acceptanceCriteria": [
+        "In `frontend/src/components/PostCard.tsx`, the author display name uses `useGetUserProfile(post.author.toString())` and shows `authorProfile.username` when available.",
+        "In `frontend/src/components/PostCard.tsx`, the avatar fallback initials are derived from `authorProfile.username` when available, otherwise fall back to principal-derived initials.",
+        "When no user profile exists for the author, the UI continues to show a safe fallback (e.g., truncated principal) without layout breakage."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/PostCard.tsx",
           "operation": "modify",
-          "description": "Add a compact quick-reaction bar to each plushie feed PostCard showing predefined emojis with counts; allow authenticated users to toggle reactions, block unauthenticated mutations with a clear UI/toast prompt, and ensure counts update via React Query invalidation/refetch without page refresh. Verify the component's usage instructions before implementing."
+          "description": "Integrate `useGetUserProfile(post.author.toString())` and render `authorProfile.username` for the author name when available; update avatar fallback initials to prefer username-derived initials and otherwise fall back to principal-derived initials; preserve current truncated-principal fallback to avoid layout breakage."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Show commenter/author username (from user profile) in comments and group post/comment UIs, matching existing Collection/Discussion behavior.",
+      "acceptanceCriteria": [
+        "In `frontend/src/components/CommentsSection.tsx`, each comment row resolves `comment.author` to a profile and displays `profile.username` when available (with a fallback if not).",
+        "In `frontend/src/components/GroupPostCard.tsx`, the group post author name resolves to `profile.username` when available (with a fallback if not).",
+        "In `frontend/src/components/GroupCommentsSection.tsx`, each group comment author name resolves to `profile.username` when available (with a fallback if not).",
+        "All user-facing strings introduced/modified for this change are in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CommentsSection.tsx",
+          "operation": "modify",
+          "description": "Refactor comment row rendering to avoid calling hooks inside a map (e.g., introduce a `CommentItem` child component) and use `useGetUserProfile(comment.author.toString())` to display `profile.username` and username-derived avatar initials when available, with truncated-principal fallback when not."
+        },
+        {
+          "path": "frontend/src/components/GroupPostCard.tsx",
+          "operation": "modify",
+          "description": "Add `useGetUserProfile(post.author.toString())` and display `profile.username` for the group post author when available; update avatar fallback initials to prefer username-derived initials, otherwise keep the principal-based fallback."
+        },
+        {
+          "path": "frontend/src/components/GroupCommentsSection.tsx",
+          "operation": "modify",
+          "description": "Refactor group comment row rendering to avoid calling hooks inside a map (e.g., introduce a `GroupCommentItem` child component) and use `useGetUserProfile(comment.author.toString())` to display `profile.username` and username-derived avatar initials when available, with truncated-principal fallback when not."
         }
       ]
     }

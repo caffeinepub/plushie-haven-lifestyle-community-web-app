@@ -1,0 +1,97 @@
+{
+  "kind": "build_request",
+  "title": "Optimize image uploads (reliability + compression) and add emoji reactions",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Make image uploads reliable across all post-creation UIs by standardizing validation, preprocessing, and error handling for uploaded images before sending them to the canister.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "make sure image uploads are optimized and add new features"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Image upload input validation is consistent across CreatePostCard, CollectionsPage, DiscussionsPage, GroupDetailPage, and MarketplacePage (at minimum: file type must be image/*, empty selection handled, max size enforced, and clear user-facing error messages).",
+        "If a user selects a non-image file or an oversized image, the UI prevents submission and shows a specific toast error instead of a generic failure.",
+        "When a backend error occurs during upload/create, the UI surfaces a more informative error message when available (e.g., unauthorized, payload too large) and always resets upload progress state to a sane value (0)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Optimize image uploads on the client by automatically resizing and compressing images before converting them to ExternalBlob, to reduce upload time and avoid failures from large image payloads.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "make sure image uploads are optimized and add new features"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Before calling ExternalBlob.fromBytes(...), the app preprocesses the selected image and produces a smaller payload (resize to a reasonable max dimension and compress to a web-friendly format).",
+        "The preview shown to the user still reflects the chosen image (and does not appear rotated incorrectly).",
+        "After preprocessing, the app enforces a final-byte-size limit and blocks submission with a clear toast message if the optimized image is still too large.",
+        "Upload progress UI continues to work as it does now (percentage updates while uploading) using the existing ExternalBlob.withUploadProgress callback."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add backend-side validation for image-based post creation to prevent traps with unclear causes and to reduce \"Failed to create post\" occurrences by returning consistent, user-friendly error messages for invalid inputs.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "make sure image uploads are optimized and add new features"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend post creation methods that accept Storage.ExternalBlob (at minimum: createPost and createCollectionPost; plus any other existing create* methods that accept image blobs) validate basic constraints (e.g., non-empty required text fields and reasonable maximum text lengths) and fail with clear trap messages when invalid.",
+        "Trap/error messages are specific enough for the frontend to map them to user-facing toast messages (e.g., \"Image too large\", \"Caption is required\", \"Unauthorized\").",
+        "Valid requests continue to succeed without changing existing data already stored."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add a new “quick reactions” feature (emoji reactions) for plushie feed posts, allowing authenticated users to react with one of several predefined emojis and see reaction counts per post.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "add new features"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes methods to: (1) get reaction counts for a post, (2) get the caller’s current reaction (if any) for that post, and (3) set/clear a reaction for that post.",
+        "Reaction types are limited to a small predefined set of emojis (defined once and reused by frontend and backend).",
+        "Frontend PostCard displays a compact reaction bar (the predefined emojis + counts).",
+        "Tapping an emoji toggles that reaction for the authenticated user; tapping the same emoji again removes it.",
+        "Unauthenticated users can view reaction counts but cannot react (UI clearly indicates reactions require login and does not attempt the mutation).",
+        "Reaction counts update after reacting (via React Query invalidation/refetch) without requiring a full page refresh."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit files in frontend immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui). Compose existing components instead.",
+    "Use English for all user-facing text (toasts, labels, button text, empty states)."
+  ],
+  "nonGoals": [
+    "Implementing third-party storage/CDN for images (all storage remains on the Internet Computer using existing blob-storage mixin).",
+    "Adding real-time updates via WebSockets or push notifications.",
+    "Implementing marketplace backend integration (MarketplacePage can reuse optimized image upload UI, but listings persistence is out of scope unless already implemented)."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

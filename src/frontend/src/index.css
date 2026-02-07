@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 1rem;
+        
+        /* Soft pastel color palette for light mode */
+        --background: 0.98 0.02 330;
+        --foreground: 0.25 0.02 280;
+        --card: 1 0 0;
+        --card-foreground: 0.25 0.02 280;
+        --popover: 1 0 0;
+        --popover-foreground: 0.25 0.02 280;
+        
+        /* Primary: Soft pink */
+        --primary: 0.72 0.15 350;
+        --primary-foreground: 1 0 0;
+        
+        /* Secondary: Soft purple */
+        --secondary: 0.85 0.08 290;
+        --secondary-foreground: 0.25 0.02 280;
+        
+        /* Muted: Very light pink-purple */
+        --muted: 0.96 0.03 320;
+        --muted-foreground: 0.55 0.05 280;
+        
+        /* Accent: Soft blue */
+        --accent: 0.88 0.08 240;
+        --accent-foreground: 0.25 0.02 280;
+        
+        /* Destructive: Soft coral */
+        --destructive: 0.65 0.18 15;
+        --destructive-foreground: 1 0 0;
+        
+        /* Borders and inputs */
+        --border: 0.92 0.03 320;
+        --input: 0.92 0.03 320;
+        --ring: 0.72 0.15 350;
+        
+        /* Chart colors - pastel rainbow */
+        --chart-1: 0.75 0.15 350;
+        --chart-2: 0.78 0.12 290;
+        --chart-3: 0.80 0.10 240;
+        --chart-4: 0.82 0.12 180;
+        --chart-5: 0.85 0.10 120;
+    }
+
+    .dark {
+        --background: 0.20 0.02 280;
+        --foreground: 0.95 0.01 320;
+        --card: 0.25 0.02 280;
+        --card-foreground: 0.95 0.01 320;
+        --popover: 0.22 0.02 280;
+        --popover-foreground: 0.95 0.01 320;
+        
+        /* Primary: Bright pink for dark mode */
+        --primary: 0.75 0.20 350;
+        --primary-foreground: 0.15 0.02 280;
+        
+        /* Secondary: Bright purple */
+        --secondary: 0.35 0.08 290;
+        --secondary-foreground: 0.95 0.01 320;
+        
+        /* Muted: Dark purple-gray */
+        --muted: 0.30 0.03 280;
+        --muted-foreground: 0.65 0.03 300;
+        
+        /* Accent: Bright blue */
+        --accent: 0.45 0.12 240;
+        --accent-foreground: 0.95 0.01 320;
+        
+        /* Destructive: Bright coral */
+        --destructive: 0.68 0.22 15;
+        --destructive-foreground: 0.15 0.02 280;
+        
+        /* Borders and inputs with transparency */
+        --border: 1 0 0 / 12%;
+        --input: 1 0 0 / 15%;
+        --ring: 0.75 0.20 350;
+        
+        /* Chart colors - vibrant for dark mode */
+        --chart-1: 0.70 0.25 350;
+        --chart-2: 0.68 0.22 290;
+        --chart-3: 0.72 0.20 240;
+        --chart-4: 0.75 0.18 180;
+        --chart-5: 0.78 0.16 120;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+    
+    /* Custom scrollbar for webkit browsers */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        @apply bg-pink-50 dark:bg-gray-800;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        @apply bg-gradient-to-b from-pink-300 to-purple-300 dark:from-pink-600 dark:to-purple-600;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        @apply from-pink-400 to-purple-400 dark:from-pink-500 dark:to-purple-500;
+    }
+}
+

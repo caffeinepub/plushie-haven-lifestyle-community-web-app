@@ -1,0 +1,115 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-07T23:19:45.795Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 4,
+    "implemented": 3,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Make image uploads reliable across all post-creation UIs by standardizing validation, preprocessing, and error handling for uploaded images before sending them to the canister.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/imageUpload.ts",
+          "frontend/src/utils/backendErrors.ts",
+          "frontend/src/components/CreatePostCard.tsx",
+          "frontend/src/pages/CollectionsPage.tsx",
+          "frontend/src/pages/DiscussionsPage.tsx",
+          "frontend/src/pages/GroupDetailPage.tsx",
+          "frontend/src/pages/MarketplacePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/imageUpload.ts",
+          "frontend/src/utils/backendErrors.ts",
+          "frontend/src/components/CreatePostCard.tsx",
+          "frontend/src/pages/CollectionsPage.tsx",
+          "frontend/src/pages/DiscussionsPage.tsx",
+          "frontend/src/pages/GroupDetailPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Optimize image uploads on the client by automatically resizing and compressing images before converting them to ExternalBlob, to reduce upload time and avoid failures from large image payloads.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/imagePreprocess.ts",
+          "frontend/src/utils/imageUpload.ts",
+          "frontend/src/components/CreatePostCard.tsx",
+          "frontend/src/pages/CollectionsPage.tsx",
+          "frontend/src/pages/DiscussionsPage.tsx",
+          "frontend/src/pages/GroupDetailPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/imagePreprocess.ts",
+          "frontend/src/utils/imageUpload.ts",
+          "frontend/src/components/CreatePostCard.tsx",
+          "frontend/src/pages/CollectionsPage.tsx",
+          "frontend/src/pages/DiscussionsPage.tsx",
+          "frontend/src/pages/GroupDetailPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Add backend-side validation for image-based post creation to prevent traps with unclear causes and to reduce \"Failed to create post\" occurrences by returning consistent, user-friendly error messages for invalid inputs.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Add a new “quick reactions” feature (emoji reactions) for plushie feed posts, allowing authenticated users to react with one of several predefined emojis and see reaction counts per post.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/constants/emojiReactions.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/PostCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/constants/emojiReactions.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/PostCard.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "build-template/Dockerfile",
+    "build-template/LICENSE",
+    "build-template/README.md",
+    "build-template/deploy.sh",
+    "build-template/icp.yaml",
+    "build-template/src/backend/canister.yaml",
+    "build-template/src/frontend/canister.yaml",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/CreatePostCard.tsx",
+    "frontend/src/components/PostCard.tsx",
+    "frontend/src/config.ts",
+    "frontend/src/constants/emojiReactions.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/CollectionsPage.tsx",
+    "frontend/src/pages/DiscussionsPage.tsx",
+    "frontend/src/pages/GroupDetailPage.tsx",
+    "frontend/src/utils/backendErrors.ts",
+    "frontend/src/utils/imagePreprocess.ts",
+    "frontend/src/utils/imageUpload.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

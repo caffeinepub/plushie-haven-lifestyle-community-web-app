@@ -1,0 +1,124 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Reliable, optimized image uploads + emoji quick reactions for feed posts",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Standardize image upload validation, preprocessing flow entry points, and user-facing error handling across all post-creation UIs.",
+      "acceptanceCriteria": [
+        "Image upload input validation is consistent across CreatePostCard, CollectionsPage, DiscussionsPage, GroupDetailPage, and MarketplacePage (at minimum: file type must be image/*, empty selection handled, max size enforced, and clear user-facing error messages).",
+        "If a user selects a non-image file or an oversized image, the UI prevents submission and shows a specific toast error instead of a generic failure.",
+        "When a backend error occurs during upload/create, the UI surfaces a more informative error message when available (e.g., unauthorized, payload too large) and always resets upload progress state to a sane value (0)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/imageUpload.ts",
+          "operation": "create",
+          "description": "Create shared helpers for image upload selection handling: consistent validation (empty selection, image/* MIME, max original size), preview creation, and producing standardized error messages for toasts. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/backendErrors.ts",
+          "operation": "create",
+          "description": "Add a small utility to normalize backend/canister errors into user-friendly messages (e.g., Unauthorized, payload too large, validation failures) for consistent toast handling across upload/create flows. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/CreatePostCard.tsx",
+          "operation": "modify",
+          "description": "Refactor image selection + submit flow to use the shared imageUpload utilities and backend error normalization; ensure empty selection is handled, non-image/oversize blocks submission with specific toast, and uploadProgress always resets to 0 on failure. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/CollectionsPage.tsx",
+          "operation": "modify",
+          "description": "Refactor image selection + submit flow to use the shared imageUpload utilities and backend error normalization; add missing file type validation, consistent oversize handling, and ensure uploadProgress resets to 0 on failures. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/DiscussionsPage.tsx",
+          "operation": "modify",
+          "description": "Refactor optional image upload handling to use shared validation utilities (including empty selection handling and max size enforcement when an image is chosen) and standardized backend error toasts; ensure uploadProgress resets to 0 on failure. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/GroupDetailPage.tsx",
+          "operation": "modify",
+          "description": "Refactor optional image upload handling to use shared validation utilities and standardized backend error toasts; keep current Unauthorized messaging but route through shared error normalization; ensure uploadProgress resets to 0 on failure. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/MarketplacePage.tsx",
+          "operation": "modify",
+          "description": "Update the mock listing image chooser to use the same shared validation and preview behavior (image/* only, empty selection handled, max size enforced, clear toast errors) even though backend persistence is out of scope. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Resize/compress images on the client before converting to ExternalBlob while preserving preview correctness and upload progress behavior.",
+      "acceptanceCriteria": [
+        "Before calling ExternalBlob.fromBytes(...), the app preprocesses the selected image and produces a smaller payload (resize to a reasonable max dimension and compress to a web-friendly format).",
+        "The preview shown to the user still reflects the chosen image (and does not appear rotated incorrectly).",
+        "After preprocessing, the app enforces a final-byte-size limit and blocks submission with a clear toast message if the optimized image is still too large.",
+        "Upload progress UI continues to work as it does now (percentage updates while uploading) using the existing ExternalBlob.withUploadProgress callback."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/imagePreprocess.ts",
+          "operation": "create",
+          "description": "Implement client-side image preprocessing: decode image with correct orientation handling where supported, resize to a reasonable max dimension, compress to a web-friendly format, and return optimized bytes plus metadata for final size enforcement. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/imageUpload.ts",
+          "operation": "modify",
+          "description": "Integrate preprocessing into the shared image upload pipeline (validate -> preprocess -> enforce final optimized byte-size limit) and expose a single helper used by all creation UIs before calling ExternalBlob.fromBytes(...). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/CreatePostCard.tsx",
+          "operation": "modify",
+          "description": "Update submission to preprocess selected image before ExternalBlob.fromBytes(...), enforce final optimized size limit with a clear toast, keep existing ExternalBlob.withUploadProgress behavior, and keep preview consistent with the chosen image. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/CollectionsPage.tsx",
+          "operation": "modify",
+          "description": "Update submission to preprocess selected image before ExternalBlob.fromBytes(...), enforce final optimized size limit with a clear toast, and keep existing ExternalBlob.withUploadProgress progress UI intact. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/DiscussionsPage.tsx",
+          "operation": "modify",
+          "description": "Update optional image path to preprocess before ExternalBlob.fromBytes(...), enforce final optimized size limit, preserve preview correctness, and keep upload progress behavior unchanged. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/GroupDetailPage.tsx",
+          "operation": "modify",
+          "description": "Update optional image path to preprocess before ExternalBlob.fromBytes(...), enforce final optimized size limit, preserve preview correctness, and keep upload progress behavior unchanged. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add quick emoji reactions UI to plushie feed posts with predefined emoji set, auth-aware toggling, and React Query refresh.",
+      "acceptanceCriteria": [
+        "Backend exposes methods to: (1) get reaction counts for a post, (2) get the caller’s current reaction (if any) for that post, and (3) set/clear a reaction for that post.",
+        "Reaction types are limited to a small predefined set of emojis (defined once and reused by frontend and backend).",
+        "Frontend PostCard displays a compact reaction bar (the predefined emojis + counts).",
+        "Tapping an emoji toggles that reaction for the authenticated user; tapping the same emoji again removes it.",
+        "Unauthenticated users can view reaction counts but cannot react (UI clearly indicates reactions require login and does not attempt the mutation).",
+        "Reaction counts update after reacting (via React Query invalidation/refetch) without requiring a full page refresh."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/constants/emojiReactions.ts",
+          "operation": "create",
+          "description": "Define the small predefined emoji reaction set in one place for reuse across PostCard and reaction hooks (must match the backend-accepted emoji IDs). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hooks for reactions using existing backend capabilities: fetch reactions per post, and toggle/set/clear via the existing reaction mutation; ensure successful mutations invalidate/refetch the relevant reaction query keys. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/PostCard.tsx",
+          "operation": "modify",
+          "description": "Add a compact quick-reaction bar to each plushie feed PostCard showing predefined emojis with counts; allow authenticated users to toggle reactions, block unauthenticated mutations with a clear UI/toast prompt, and ensure counts update via React Query invalidation/refetch without page refresh. Verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

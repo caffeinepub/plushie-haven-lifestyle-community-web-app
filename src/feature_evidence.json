@@ -1,0 +1,77 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-make-image-uploads-reliable-across-all-post-creation-uis-by-standardizing-validation-preprocessing-and-error-handling-for-uploaded-images-before-sending-them-to-the-canister",
+      "featureTitle": "Make image uploads reliable across all post-creation UIs by standardizing validation, preprocessing, and error handling for uploaded images before sending them to the canister.",
+      "files": [
+        "frontend/src/components/CreatePostCard.tsx",
+        "frontend/src/pages/CollectionsPage.tsx",
+        "frontend/src/pages/DiscussionsPage.tsx",
+        "frontend/src/pages/GroupDetailPage.tsx",
+        "frontend/src/utils/backendErrors.ts",
+        "frontend/src/utils/imageUpload.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-optimize-image-uploads-on-the-client-by-automatically-resizing-and-compressing-images-before-converting-them-to-externalblob-to-reduce-upload-time-and-avoid-failures-from-large-image-payloads",
+      "featureTitle": "Optimize image uploads on the client by automatically resizing and compressing images before converting them to ExternalBlob, to reduce upload time and avoid failures from large image payloads.",
+      "files": [
+        "frontend/src/components/CreatePostCard.tsx",
+        "frontend/src/pages/CollectionsPage.tsx",
+        "frontend/src/pages/DiscussionsPage.tsx",
+        "frontend/src/pages/GroupDetailPage.tsx",
+        "frontend/src/utils/imagePreprocess.ts",
+        "frontend/src/utils/imageUpload.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-new-quick-reactions-feature-emoji-reactions-for-plushie-feed-posts-allowing-authenticated-users-to-react-with-one-of-several-predefined-emojis-and-see-reaction-counts-per-post",
+      "featureTitle": "Add a new “quick reactions” feature (emoji reactions) for plushie feed posts, allowing authenticated users to react with one of several predefined emojis and see reaction counts per post.",
+      "files": [
+        "frontend/src/components/PostCard.tsx",
+        "frontend/src/constants/emojiReactions.ts",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
